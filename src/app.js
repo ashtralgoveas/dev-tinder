@@ -2,9 +2,25 @@ const express = require("express");
 
 const app = express();
 
-app.use("/test", (req, res) => {
-  res.send("test route is working");
-});
+app.get(
+  "/user/:userId",
+  (req, res, next) => {
+    console.log("route 1");
+    next();
+  },
+  [
+    (req, res, next) => {
+      console.log("route 2");
+      next();
+    },
+  ],
+  [
+    (req, res, next) => {
+      console.log("route 3");
+      res.send({ name: "Ash", age: 22 });
+    },
+  ],
+);
 
 app.use("/", (req, res) => {
   res.send("Home route is working");
