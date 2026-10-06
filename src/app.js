@@ -50,6 +50,18 @@ app.get("/userId", async (req, res) => {
   }
 });
 
+// Delete user by Id - DELETE /user - delete the user from the database by id
+app.delete("/user", async (req, res) => {
+  const userId = req.body.userId;
+  try {
+    const users = await User.findByIdAndDelete(userId);
+
+    res.send("User deleted successfully");
+  } catch (err) {
+    res.status(500).send("Failed to delete user " + err.message);
+  }
+});
+
 // Feed Api - GET /feed - get all the users from the datatbase
 app.get("/feed", async (req, res) => {
   try {
