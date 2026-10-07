@@ -50,7 +50,7 @@ app.get("/userId", async (req, res) => {
   }
 });
 
-// Delete user by Id - DELETE /user - delete the user from the database by id
+// Delete user - DELETE /user - delete the user from the database
 app.delete("/user", async (req, res) => {
   const userId = req.body.userId;
   try {
@@ -59,6 +59,38 @@ app.delete("/user", async (req, res) => {
     res.send("User deleted successfully");
   } catch (err) {
     res.status(500).send("Failed to delete user " + err.message);
+  }
+});
+
+// Update user by Id - PATCH /userId - update the user in the database by id
+app.patch("/user", async (req, res) => {
+  const userId = req.body.userId;
+  const data = req.body;
+  try {
+    const user = await User.findByIdAndUpdate({ _id: userId }, data, {
+      returnDocument: "after",
+    });
+
+    console.log("User before update: ", user);
+    res.send("User updated successfully");
+  } catch (err) {
+    res.status(500).send("Error fetching users " + err.message);
+  }
+});
+
+// Update user by email - PATCH /userId - update the user in the database by email
+app.patch("/userEmail", async (req, res) => {
+  const userEmail = req.body.emailId;
+  const data = req.body;
+  try {
+    const user = await User.findOneAndUpdate({ emailId: userEmail }, data);
+
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+    res.send("User updated successfully");
+  } catch (err) {
+    res.status(500).send("Error fetching users " + err.message);
   }
 });
 
