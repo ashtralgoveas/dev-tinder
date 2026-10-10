@@ -14,7 +14,7 @@ app.post("/signup", async (req, res) => {
     await user.save();
     res.send("User added successfully");
   } catch (err) {
-    res.status(400).send("Error saving the user" + err.message);
+    res.status(500).send("Error saving the user" + err.message);
   }
 });
 
@@ -63,12 +63,27 @@ app.delete("/user", async (req, res) => {
 });
 
 // Update user by Id - PATCH /userId - update the user in the database by id
-app.patch("/user", async (req, res) => {
-  const userId = req.body.userId;
+app.patch("/user/:userId", async (req, res) => {
+  const userId = req.params?.userId;
   const data = req.body;
+  console.log(data, userId);
   try {
+    const ALLOWED_UPDATES = ["photoUrl", "about", "gender", "age", "skills"];
+
+    const isUpdateAllowed = Object.keys(data).every((update) =>
+      ALLOWED_UPDATES.includes(update),
+    );
+
+    if (!isUpdateAllowed) {
+      throw new Error("Update not allowed");
+    }
+    if (data?.skills?.length > 10) {
+      throw new Error("Skills cannot be more than 10");
+    }
+
     const user = await User.findByIdAndUpdate({ _id: userId }, data, {
       returnDocument: "after",
+      runValidators: true,
     });
 
     console.log("User before update: ", user);
@@ -83,7 +98,9 @@ app.patch("/userEmail", async (req, res) => {
   const userEmail = req.body.emailId;
   const data = req.body;
   try {
-    const user = await User.findOneAndUpdate({ emailId: userEmail }, data);
+    const user = await User.findOneAndUpdate({ emailId: userEmail }, data, {
+      runValidators: true,
+    });
 
     if (!user) {
       return res.status(404).send("User not found");
